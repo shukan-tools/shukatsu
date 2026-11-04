@@ -315,7 +315,10 @@
   .ib-text { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: 12.5px; color: var(--muted); }
   .ib-text b { font-size: 14px; color: var(--ink); }
   .ib-btn { height: 34px; padding: 0 14px; flex-shrink: 0; }
-  .ib-close { width: 30px; height: 30px; border-radius: 999px; color: var(--faint); font-size: 18px; flex-shrink: 0; }
+  /* ×は文字ではなく絵（ICON.x）にして、丸の真ん中にそろえる */
+  .ib-close { position: relative; width: 32px; height: 32px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--faint); flex-shrink: 0; }
+  .ib-close svg.i { width: 16px; height: 16px; }
+  .ib-close::after { content: ''; position: absolute; inset: -6px; }
   .ib-close:hover { background: var(--line-soft); color: var(--ink); }
   .step-num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 12px; font-weight: 800; flex-shrink: 0; }
   .steps { list-style: none; display: grid; gap: 16px; }
@@ -2339,7 +2342,7 @@ function renderInstallBanner() {
       <button class="btn btn-primary ib-btn" onclick="runInstall()">インストール</button>`;
   }
   el.hidden = !body;
-  el.innerHTML = body ? `<img src="${MARK_SRC}" alt="" class="ib-mark">${body}<button class="ib-close" onclick="dismissInstall()" aria-label="閉じる">×</button>` : '';
+  el.innerHTML = body ? `<img src="${MARK_SRC}" alt="" class="ib-mark">${body}<button class="ib-close" onclick="dismissInstall()" aria-label="閉じる">${ICON.x}</button>` : '';
 }
 function dismissInstall() { lsSet(LS_INSTALL_DISMISS, new Date().toISOString()); renderInstallBanner(); }
 async function runInstall() {
