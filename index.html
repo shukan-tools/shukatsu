@@ -1915,10 +1915,23 @@ function deleteCompany(id) {
   showToast(`${c.company} を削除しました`, true);
 }
 
+// マイページを開くと同時にログインIDをコピーする。
+// 新しいタブ（スマホなら Safari）に切り替わる前に終わらせたいので、まずその場で確実にコピーできる方法を使い、
+// だめなときだけ新しい方法（clipboard API）を試す
 function copyLoginId(loginid) {
   if (!loginid) return;
   const ok = () => showToast(`ログインID「${loginid}」をコピーしました`, false, true);
-  if (navigator.clipboard) navigator.clipboard.writeText(loginid).then(ok).catch(() => {});
+  const ta = document.createElement('textarea');
+  ta.value = loginid;
+  ta.setAttribute('readonly', '');
+  ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px;';
+  document.body.appendChild(ta);
+  ta.select(); ta.setSelectionRange(0, loginid.length);
+  let done = false;
+  try { done = document.execCommand('copy'); } catch (e) {}
+  ta.remove();
+  if (done) ok();
+  else if (navigator.clipboard) navigator.clipboard.writeText(loginid).then(ok).catch(() => {});
 }
 
 // ── ポップオーバー ───────────────────────────────────
