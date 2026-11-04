@@ -243,7 +243,7 @@
   .pm-note { font-size: 12px; color: var(--muted); padding: 4px 10px 8px; }
   .pm-note.warn { color: var(--red-ink); font-weight: 700; }
   .pop-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 6px 8px; }
-  .chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 12.5px; font-weight: 700; color: var(--ink-2); transition: all 0.12s; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 12.5px; font-weight: 700; color: var(--ink-2); white-space: nowrap; transition: all 0.12s; }
   .chip:hover { border-color: var(--ink-2); color: var(--ink); }
   .chip.on { background: var(--ink); border-color: var(--ink); color: #fff; }
   .chip .tier.sm { margin-left: -6px; }
@@ -365,11 +365,10 @@
   .done-mark { width: 40px; height: 40px; border-radius: 999px; background: var(--teal); color: #fff; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; animation: done-pop 0.35s cubic-bezier(.3,1.6,.6,1); }
   .done-mark svg.i { width: 20px; height: 20px; stroke-width: 3; }
   @keyframes done-pop { from { transform: scale(0.4); opacity: 0; } }
-  /* ── 起動画面（スマホだけ） ── 背景色は manifest の background_color（白）と同じにして、OS の起動画面からつなげる */
-  #splash { display: none; }
-  @media (max-width: 760px) {
+  /* ── 起動画面（スマホ・パソコン共通） ── 背景色は manifest の background_color（白）と同じにして、OS の起動画面からつなげる */
+  @media all {
     #splash { display: flex; position: fixed; inset: 0; z-index: 1000; background: #fff; flex-direction: column; align-items: center; justify-content: center; gap: 26px; padding-bottom: 6vh; transition: opacity 0.35s ease, visibility 0.35s; }
-    #splash img { height: 40px; animation: splash-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+    #splash img { height: clamp(40px, 5vw, 52px); animation: splash-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
     #splash .bar { position: relative; width: 64px; height: 3px; border-radius: 999px; background: var(--line); overflow: hidden; animation: splash-in 0.5s 0.1s both; }
     #splash .bar::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; border-radius: inherit; background: var(--teal); animation: splash-bar 1s ease-in-out infinite; }
     #splash.hide { opacity: 0; visibility: hidden; }
@@ -532,7 +531,7 @@
   .flow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
   .flow-arrow { color: #C4C9CF; font-weight: 800; }
   .flow-step { display: inline-flex; align-items: center; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); }
-  .flow-step > button:first-child { display: inline-flex; align-items: center; gap: 4px; height: 30px; padding: 0 12px; font-size: 12.5px; font-weight: 700; color: var(--muted); border-radius: 999px; }
+  .flow-step > button:first-child { display: inline-flex; align-items: center; gap: 4px; height: 30px; padding: 0 12px; font-size: 12.5px; font-weight: 700; color: var(--muted); border-radius: 999px; white-space: nowrap; }
   .flow-step.done { background: var(--teal); border-color: var(--teal); }
   .flow-step.done > button:first-child { color: #fff; }
   .flow-step.done svg.i { width: 13px; height: 13px; stroke-width: 3; }
@@ -2636,15 +2635,14 @@ centerInk(document.body);
 // フォントの読み込みが終わったら測り直す
 document.fonts.ready.then(() => { for (const k in inkCache) delete inkCache[k]; centerInk(document.body); });
 
-// 起動画面：フォントがそろうまで出す（ちらつかないよう最低0.7秒、待っても最長2秒）
+// 起動画面：3秒出す（フォントの読み込みが遅いときも3秒で消す）
 (() => {
   const splash = document.getElementById('splash');
   if (!splash || getComputedStyle(splash).display === 'none') { if (splash) splash.remove(); return; }
-  const wait = ms => new Promise(r => setTimeout(r, ms));
-  Promise.all([Promise.race([document.fonts.ready, wait(2000)]), wait(700)]).then(() => {
+  setTimeout(() => {
     splash.classList.add('hide');
     setTimeout(() => splash.remove(), 400);
-  });
+  }, 3000);
 })();
 
 // ── オフラインで開けるようにする（PWA） ───────────────
