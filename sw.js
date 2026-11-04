@@ -1,10 +1,10 @@
 // シュウカン：オフラインでも開けるようにするための Service Worker
 // 本体（index.html）は「ネット優先」：つながるときは常に最新版、つながらないときは保存版を出す
-const CACHE = 'shukan-v3';
-const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-180.png'];
+const CACHE = 'shukan-v4';
+const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png?v=2', './icon-512.png?v=2', './icon-180.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE.map(u => new Request(u, { cache: 'reload' })))   // ブラウザの一時保存（古い版）を使わず、必ずサーバーから取り直す).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
