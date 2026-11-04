@@ -1,6 +1,6 @@
 // シュウカン：オフラインでも開けるようにするための Service Worker
 // 本体（index.html）は「ネット優先」：つながるときは常に最新版、つながらないときは保存版を出す
-const CACHE = 'shukan-v2';
+const CACHE = 'shukan-v3';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-180.png'];
 
 self.addEventListener('install', e => {
