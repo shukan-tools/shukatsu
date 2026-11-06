@@ -214,7 +214,6 @@
   .t-S { background: #14B8A6; }
   .t-A { background: #6ED6C9; }
   .t-B { background: #BDEDE6; }
-  .t-C { background: #DFF5F1; }   /* 第四：第三よりさらに薄い緑（4段階すべて緑の濃さで表す） */
   .t-none { background: #ECEEF0; color: var(--muted); }   /* 未設定：緑ではなくグレー */
 
   .balance { display: flex; align-items: center; gap: 6px 14px; margin: -6px 0 18px; flex-wrap: wrap; }
@@ -733,7 +732,6 @@
   .section-head > span.tier.t-S:first-child { background: #14B8A6; }
   .section-head > span.tier.t-A:first-child { background: #6ED6C9; }
   .section-head > span.tier.t-B:first-child { background: #BDEDE6; }
-  .section-head > span.tier.t-C:first-child { background: #DFF5F1; }
   .section-head > span.tier.t-none:first-child { background: #ECEEF0; }
   .section-head.disclosure { width: auto; padding: 4px 12px 4px 8px; border-radius: 999px; }
   .balance { display: inline-flex; padding: 8px 14px; border-radius: 999px; margin-top: 0; }
@@ -758,6 +756,10 @@
     .hero > div:first-child { width: 100%; }
   }
 
+  /* 企業名の横の志望度：丸3つ。埋まった数が志望度の高さ */
+  .tier-dots { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; vertical-align: -1px; }
+  .tier-dots b { width: 11px; height: 11px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(13,148,136,0.45); }
+  .tier-dots b.on { background: #0D9488; box-shadow: none; }
   /* 絞り込みの選択肢：3列で同じ大きさにそろえる */
   .pop-chips.even { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .pop-chips.even .chip { justify-content: center; padding: 0 4px; }
@@ -1071,12 +1073,11 @@ function shelveCompany(id, on) {
   showToast(on ? `「${c.company}」を非表示にしました` : `「${c.company}」を表示しました`, true);
 }
 
-const TIERS = ['S', 'A', 'B', 'C'];
+const TIERS = ['S', 'A', 'B'];
 const TIER_INFO = {
   S: { short: '第一', long: '第一志望群' },
   A: { short: '第二', long: '第二志望群' },
   B: { short: '第三', long: '第三志望群' },
-  C: { short: '第四', long: '第四志望群' },
   none: { short: '未設定', long: '未設定' },
 };
 // 小さいバッジは「第一」、見出しやメニューは「第一志望群」
@@ -1128,6 +1129,11 @@ function getTodo(id) { return todos.find(t => String(t.id) === String(id)); }
 function todosOf(cid) { return todos.filter(t => String(t.cid) === String(cid)); }
 function tierKey(c) { return TIERS.includes(c.tier) ? c.tier : 'none'; }
 function tierCls(t) { return TIERS.includes(t) ? 't-' + t : 't-none'; }
+// 企業名の横の志望度：丸3つ（第一＝3つ埋まる、第二＝2つ、第三＝1つ、未設定＝すべて空）
+function tierDots(t) {
+  const i = TIERS.indexOf(t), n = i < 0 ? 0 : TIERS.length - i, label = tierLabel(t, true);
+  return `<span class="tier-dots" role="img" title="${label}" aria-label="${label}">${TIERS.map((_, k) => `<b${k < n ? ' class="on"' : ''}></b>`).join('')}</span>`;
+}
 function tierRank(c) { const i = TIERS.indexOf(c && c.tier); return i < 0 ? TIERS.length : i; }
 function statusGroup(c) { return ENDED.includes(c.status) ? 'ended' : c.status; }
 
@@ -1181,6 +1187,7 @@ function parsePayload(obj) {
 function normalizeCompany(c) {
   // メモは題名つきで何枚でも持てる（notes）。1枚だけだった古いメモ（memo）は「メモ」という題名で引き継ぐ
   const { memo, flow, ...rest } = c;
+  if (rest.tier === 'C') rest.tier = 'B';   // 第四志望群は廃止。第三にまとめる
   const notes = Array.isArray(c.notes) ? c.notes
     : (memo ? [{ id: uid(), title: 'メモ', body: memo, updated: todayStr() }] : []);
   const status = ST[c.status] ? c.status : 'prep';
@@ -1384,7 +1391,7 @@ function todoRowHtml(t, today) {
   return `<div class="trow${ENDED.includes(c.status) ? ' ended' : ''}" data-tid="${esc(t.id)}" data-cid="${esc(t.cid)}">
     <button class="check" onclick="completeTodo(tidOf(this))" title="完了にする">${ICON.check}</button>
     <span class="t-text" onclick="editTodoText(this)" title="クリックで編集">${esc(t.text)}</span>
-    <button class="t-co" onclick="openDetail(cidOf(this))" title="企業管理で開く"><span class="tier sm ${tierCls(c.tier)}">${tierLabel(c.tier)}</span><span class="t-co-name">${esc(c.company)}</span></button>
+    <button class="t-co" onclick="openDetail(cidOf(this))" title="企業管理で開く">${tierDots(c.tier)}<span class="t-co-name">${esc(c.company)}</span></button>
     ${deadlinePill(t.date, today)}
     <button class="r-more" onclick="openTodoModal(tidOf(this))" title="編集" aria-label="編集">${ICON.edit}</button>
   </div>`;
@@ -1501,7 +1508,7 @@ function setTodoCompany(cid) {
   document.getElementById('t-cid').value = cid || '';
   const c = getCompany(cid);
   const btn = document.getElementById('t-cid-btn');
-  btn.querySelector('span').innerHTML = c ? `<span class="tier sm ${tierCls(c.tier)}">${tierLabel(c.tier)}</span> ${esc(c.company)}` : '企業を選ぶ';
+  btn.querySelector('span').innerHTML = c ? `${tierDots(c.tier)} ${esc(c.company)}` : '企業を選ぶ';
   btn.classList.toggle('empty', !c);
 }
 function companyPicker(btn) {
@@ -1509,7 +1516,7 @@ function companyPicker(btn) {
   const list = [...companies].filter(c => !ENDED.includes(c.status) || String(c._id) === cur)
     .sort((a, b) => tierRank(a) - tierRank(b) || a.company.localeCompare(b.company, 'ja'));
   openPop(btn, `<div class="pop-title">企業</div>` + list.map(c =>
-    `<button class="pm-item${String(c._id) === cur ? ' active' : ''}" onclick="closePop();setTodoCompany('${esc(c._id)}')"><span class="tier sm ${tierCls(c.tier)}">${tierLabel(c.tier)}</span>${esc(c.company)}</button>`).join('')
+    `<button class="pm-item${String(c._id) === cur ? ' active' : ''}" onclick="closePop();setTodoCompany('${esc(c._id)}')">${tierDots(c.tier)}${esc(c.company)}</button>`).join('')
     + `<div class="pop-sep"></div><button class="pm-item" onclick="closePop();closeTodoModal();openCompanyModal()">${ICON.plus}新しい企業を追加</button>`, { width: 280 });
 }
 function saveTodoModal() {
@@ -2122,7 +2129,7 @@ function loadSample() {
   const b = mk('サンプル都市開発', 'A', 'prep', 0, [[-10, '会社説明会に参加']], '');
   const c = mk('サンプルホームズ', 'B', 'active', 1, [[-4, 'ES提出', true]], '');
   const e = mk('サンプル地所', 'A', 'prep', 0, [], '');
-  const f = mk('サンプル建設', 'C', 'ng', 1, [[-15, 'サマーインターン選考 不合格']], '');
+  const f = mk('サンプル建設', 'B', 'ng', 1, [[-15, 'サマーインターン選考 不合格']], '');
   companies = companies.concat([a, b, c, e, f]);
   todos = todos.concat([
     { id: uid(), cid: a._id, text: '一次面接', date: d(2) },
