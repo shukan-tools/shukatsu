@@ -758,8 +758,8 @@
 
   /* 企業名の横の志望度：丸3つ。埋まった数が志望度の高さ */
   .tier-dots { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; vertical-align: -1px; }
-  .tier-dots b { width: 11px; height: 11px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(13,148,136,0.45); }
-  .tier-dots b.on { background: #0D9488; box-shadow: none; }
+  .tier-dots b { width: 11px; height: 11px; border-radius: 50%; background: #fff; }
+  .tier-dots b.on { background: #0D9488; }
   /* 絞り込みの選択肢：3列で同じ大きさにそろえる */
   .pop-chips.even { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .pop-chips.even .chip { justify-content: center; padding: 0 4px; }
@@ -771,6 +771,20 @@
     .crow { grid-template-columns: 5px auto minmax(0, 1fr) auto 32px; }
     .crow > .badge { width: 100px; }   /* スマホは横の選考の流れに場所をゆずる */
   }
+
+  /* 締切の表示は色分けしない：「期限切れ」「今日」などの見出しで分かれているので、同じ見た目にそろえる */
+  .dl-pill, .dl-today, .dl-yellow, .dl-green, .dl-over { background: #fff; color: var(--ink-2); }
+  .dl-none { background: transparent; color: var(--faint); }
+
+  /* 背景の画像は薄めて使う（一覧より目立たないように） */
+  body::before { opacity: 0.34; }
+
+  /* 選考の進み具合：済み＝緑、今の段階＝緑がゆっくり明滅、これから＝白 */
+  .fd { background: #fff; }
+  .fd.done { background: var(--teal); }
+  .fd.cur { background: var(--teal); box-shadow: none; animation: fd-pulse 2.4s ease-in-out infinite; }
+  @keyframes fd-pulse { 50% { opacity: 0.4; } }
+  @media (prefers-reduced-motion: reduce) { .fd.cur { animation: none; opacity: 0.6; } }
 </style>
 </head>
 <body>
