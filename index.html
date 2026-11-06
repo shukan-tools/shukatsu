@@ -785,6 +785,9 @@
   .fd.cur { background: var(--teal); box-shadow: none; animation: fd-pulse 2.4s ease-in-out infinite; }
   @keyframes fd-pulse { 50% { opacity: 0.4; } }
   @media (prefers-reduced-motion: reduce) { .fd.cur { animation: none; opacity: 0.6; } }
+
+  /* 企業の一覧の「選考準備中」「選考中」：白地・枠なし・黒文字にそろえる */
+  .crow > .badge.s-prep, .crow > .badge.s-active, .row > .badge.s-prep, .row > .badge.s-active { background: #fff; color: var(--ink); box-shadow: none; border: none; }
 </style>
 </head>
 <body>
