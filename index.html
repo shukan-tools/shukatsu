@@ -31,8 +31,8 @@
     --teal-dark: #0F9483;
     --teal-ink: #0F766E;
     --teal-soft: #E6F7F5;
-    --red: #E5484D;
-    --red-ink: #C2303A;
+    --red: #D93A41;       /* 赤はページ全体でこの1色だけ */
+    --red-ink: var(--red);
     --red-soft: #FDECEC;
     --amber: #9A6700;
     --amber-soft: #FDF4E0;
@@ -756,10 +756,6 @@
     .hero > div:first-child { width: 100%; }
   }
 
-  /* 企業名の横の志望度：丸3つ。埋まった数が志望度の高さ */
-  .tier-dots { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; vertical-align: -1px; }
-  .tier-dots b { width: 11px; height: 11px; border-radius: 50%; background: #fff; }
-  .tier-dots b.on { background: #0D9488; }
   /* 絞り込みの選択肢：3列で同じ大きさにそろえる */
   .pop-chips.even { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .pop-chips.even .chip { justify-content: center; padding: 0 4px; }
@@ -788,6 +784,69 @@
 
   /* 企業の一覧の「選考準備中」「選考中」：白地・枠なし・黒文字にそろえる */
   .crow > .badge.s-prep, .crow > .badge.s-active, .row > .badge.s-prep, .row > .badge.s-active { background: #fff; color: var(--ink); box-shadow: none; border: none; }
+
+  /* ══ 白ベース：背景は真っ白、カードは細い線の不透明な白。すりガラスは使わない ══
+     （緑の背景に戻すときは、このまとまりを消す） */
+  :root { --bg-img: none; --glass: #fff; --glass-strong: #fff; --glass-edge: #E7E9EC; --glass-shadow: 0 1px 2px rgba(17,20,24,0.04); }
+  html.at-bottom { background: #fff; }
+  body::before { opacity: 1; }
+  .topbar { background: #fff; border-bottom-color: #E7E9EC; }
+  @media (hover: hover) { .topbar { background: #fff; } }
+  .stats, .rows, .empty-state, .sample-banner, .balance, .hero > div:first-child, .search input, #btn-filter, .toolbar .btn-ghost, .view-switch,
+  .section-head:not(.disclosure) > span:first-child, .section-head.disclosure { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .section-head > span.tier:first-child { box-shadow: none; }
+  .trow, .crow, .row { border-bottom-color: #EEF0F2; }
+  .rows .trow:hover, .rows .crow:hover, .rows .row:hover { background: #F7F8F9; }
+  /* 切り替えは黒い板に白文字 */
+  .view-switch { background: #F1F2F4; }
+  .view-switch::before { background: #111418; box-shadow: none; }
+  .view-switch button.active { color: #fff; }
+  /* 進み具合は黒。これからの分は薄いグレー */
+  .fd { background: #E3E6E9; }
+  .fd.done, .fd.cur { background: #111418; }
+  /* 締切と選考中の札：薄いグレーに黒文字 */
+  .dl-pill, .dl-today, .dl-yellow, .dl-green, .dl-over { background: #F1F2F4; color: #111418; }
+  .dl-none { background: transparent; color: var(--faint); }
+  .crow > .badge.s-prep, .crow > .badge.s-active, .row > .badge.s-prep, .row > .badge.s-active { background: #F1F2F4; color: #111418; }
+
+  /* 区切りをはっきりさせる：線をやめて影で浮かせ、1件ずつ独立したカードにする。見出しは札をやめて太字に */
+  :root { --glass-edge: transparent; --glass-shadow: 0 1px 2px rgba(17,20,24,0.05), 0 8px 24px rgba(17,20,24,0.08); }
+  .section-head:not(.disclosure) > span:first-child:not(.tier) { background: none; border: none; box-shadow: none; padding: 0; font-size: 15px; font-weight: 800; border-radius: 0; }
+  .rows { background: none; border: none; box-shadow: none; overflow: visible; display: grid; gap: 10px; }
+  .rows .trow, .rows .crow, .rows .row { background: #fff; border: none; border-radius: 16px; box-shadow: 0 1px 2px rgba(17,20,24,0.05), 0 8px 22px rgba(17,20,24,0.08); }
+  .rows .trow:hover, .rows .crow:hover, .rows .row:hover { background: #FAFBFB; }
+
+  /* 企業管理の見出しも、締切管理と同じ太字の文字にそろえる */
+  .section-head > span.tier:first-child { background: none !important; color: var(--ink); width: auto; height: auto; padding: 0; border-radius: 0; font-size: 15px; font-weight: 800; letter-spacing: normal; line-height: 1.5; }
+
+  /* 志望度の表記は「色の点＋文字」の1種類にそろえる */
+  .tdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: 0; background: #E3E6E9; }
+  .tdot.t-S { background: #0D9488; }
+  .tdot.t-A { background: #4CCFBF; }
+  .tdot.t-B { background: #A5E5DB; }
+  .section-head:not(.disclosure) > span:first-child { gap: 7px; }
+  .bal-t { font-style: normal; font-size: 12px; font-weight: 800; color: var(--ink); white-space: nowrap; }
+  .seg-t { font-weight: 700; }
+  .tier-btn { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 999px; background: #F1F2F4; font-size: 12px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  /* 企業の一覧は色の縦線をなくした分、列を詰める */
+  .crow { grid-template-columns: minmax(0, 1.1fr) 116px minmax(0, 1.2fr) 32px; padding-left: 16px; }
+  @media (max-width: 760px) {
+    .crow { grid-template-columns: auto minmax(0, 1fr) auto 32px; grid-template-areas: "main main main more" "status flow flow flow"; }
+  }
+
+  /* 締切の色：見出しと日付の札を同じ色にする（期限切れ＝黒、今日＝赤、3日以内＝黄色、1週間以内＝緑、それ以降＝グレー） */
+  .section-head.tone-over { color: var(--ink); }
+  .section-head.tone-today { color: var(--red); }
+  .section-head.tone-soon { color: #E89B0C; }
+  .section-head.tone-week { color: #1FA463; }
+  .section-head.tone-later { color: #5F6873; }
+  .dl-pill { background: #5F6873; color: #fff; }
+  .dl-over { background: var(--ink); color: #fff; }
+  .dl-today { background: var(--red); color: #fff; }
+  .dl-yellow { background: #E89B0C; color: #fff; }
+  .dl-green { background: #1FA463; color: #fff; }
+  .dl-pill .date { opacity: 0.85; }
+  .dl-none { background: transparent; color: var(--faint); }
 </style>
 </head>
 <body>
@@ -1146,10 +1205,10 @@ function getTodo(id) { return todos.find(t => String(t.id) === String(id)); }
 function todosOf(cid) { return todos.filter(t => String(t.cid) === String(cid)); }
 function tierKey(c) { return TIERS.includes(c.tier) ? c.tier : 'none'; }
 function tierCls(t) { return TIERS.includes(t) ? 't-' + t : 't-none'; }
-// 企業名の横の志望度：丸3つ（第一＝3つ埋まる、第二＝2つ、第三＝1つ、未設定＝すべて空）
+// 志望度の印：色の点1つ（濃い緑＝第一、中くらいの緑＝第二、薄い緑＝第三、グレー＝未設定）
 function tierDots(t) {
-  const i = TIERS.indexOf(t), n = i < 0 ? 0 : TIERS.length - i, label = tierLabel(t, true);
-  return `<span class="tier-dots" role="img" title="${label}" aria-label="${label}">${TIERS.map((_, k) => `<b${k < n ? ' class="on"' : ''}></b>`).join('')}</span>`;
+  const label = tierLabel(t, true);
+  return `<i class="tdot ${tierCls(t)}" role="img" title="${label}" aria-label="${label}"></i>`;
 }
 function tierRank(c) { const i = TIERS.indexOf(c && c.tier); return i < 0 ? TIERS.length : i; }
 function statusGroup(c) { return ENDED.includes(c.status) ? 'ended' : c.status; }
@@ -1385,11 +1444,11 @@ function todoViewHtml() {
   }
   const today = startOfToday();
   const buckets = [
-    { title: '期限切れ',   tone: 'red',   items: [] },
-    { title: '今日',       tone: 'red',   items: [] },
-    { title: '3日以内',    tone: 'amber', items: [] },
-    { title: '1週間以内',  tone: '',      items: [] },
-    { title: 'それ以降',   tone: '',      items: [] },
+    { title: '期限切れ',   tone: 'over',  items: [] },
+    { title: '今日',       tone: 'today', items: [] },
+    { title: '3日以内',    tone: 'soon',  items: [] },
+    { title: '1週間以内',  tone: 'week',  items: [] },
+    { title: 'それ以降',   tone: 'later', items: [] },
     { title: '日付なし',   tone: '',      items: [] },
   ];
   list.forEach(t => {
@@ -1574,7 +1633,7 @@ function companyViewHtml() {
     ...c.events.map(e => e.text), ...todosOf(c._id).map(t => t.text)));
   const active = companies.filter(c => !ENDED.includes(c.status) && !isShelved(c));
   const balance = `<div class="balance"><span class="bal-label">受けている企業</span>${TIERS.map(t =>
-    `<span class="bal-item"><span class="tier sm t-${t}">${tierLabel(t)}</span><span><b class="num">${active.filter(c => c.tier === t).length}</b>社</span></span>`).join('')}</div>`;
+    `<span class="bal-item">${tierDots(t)}<em class="bal-t">${tierLabel(t)}</em><span><b class="num">${active.filter(c => c.tier === t).length}</b>社</span></span>`).join('')}</div>`;
   if (!list.length) return balance + emptyFilteredHtml();
   const today = startOfToday();
   const groups = { S: [], A: [], B: [], C: [], none: [] };
@@ -1583,7 +1642,7 @@ function companyViewHtml() {
   // 志望度の中では、終わった企業をいちばん下にする
   const sortCo = (a, b) => ENDED.includes(a.status) - ENDED.includes(b.status) || STATUS_ORDER.indexOf(b.status) - STATUS_ORDER.indexOf(a.status) || a.company.localeCompare(b.company, 'ja');
   let html = balance + [...TIERS, 'none'].filter(k => groups[k].length).map(k => `<section class="section">
-    <div class="section-head"><span class="tier wide ${tierCls(k === 'none' ? '' : k)}">${tierLabel(k, true)}</span></div>
+    <div class="section-head"><span>${tierDots(k === 'none' ? '' : k)}${tierLabel(k, true)}</span></div>
     <div class="rows">${groups[k].sort(sortCo).map(c => companyRowHtml(c, today)).join('')}</div>
   </section>`).join('');
   if (ended.length) html += `<section class="section">
@@ -1608,7 +1667,6 @@ function companyRowHtml(c, today) {
     ? `<span class="r-next">次：${esc(nt.text)}${nt.date ? `<span class="r-next-date num">${shortDate(nt.date)}</span>` : ''}</span>`
     : '<span class="r-sub-none">やることなし</span>';
   return `<div class="crow${ENDED.includes(c.status) || isShelved(c) ? ' ended' : ''}" data-cid="${esc(c._id)}" onclick="rowOpen(event, this)">
-    <button class="rank-bar ${tierCls(c.tier)}" onclick="tierMenu(this)" title="${tierLabel(c.tier, true)}（押すと変更）" aria-label="${tierLabel(c.tier, true)}"></button>
     <div class="r-main">
       <div class="r-title"><button class="r-name" onclick="openDetail(cidOf(this))" title="詳細を開く"><span>${esc(c.company)}</span></button></div>
       <div class="r-sub">${sub}</div>
@@ -1693,7 +1751,7 @@ function renderDetail() {
   document.getElementById('detail').innerHTML = `
     <div class="modal-head d-head" data-cid="${esc(c._id)}">
       <div class="d-title"><h2>${esc(c.company)}</h2>
-        <div class="d-meta"><button class="tier wide ${tierCls(c.tier)}" onclick="tierMenu(this)" title="志望度を変更">${tierLabel(c.tier, true)}</button><button class="badge ${st.cls}" onclick="statusMenu(this)">${st.label}${ICON.chev}</button>${mypageBtnHtml(c)}</div>
+        <div class="d-meta"><button class="tier-btn" onclick="tierMenu(this)" title="志望度を変更">${tierDots(c.tier)}${tierLabel(c.tier, true)}</button><button class="badge ${st.cls}" onclick="statusMenu(this)">${st.label}${ICON.chev}</button>${mypageBtnHtml(c)}</div>
       </div>
       <div class="d-actions">
         <button class="link-btn" onclick="openCompanyModal('${esc(c._id)}')" title="企業情報を編集">編集</button>
@@ -1955,7 +2013,7 @@ function deleteNote() {
 function setTierField(v) {
   document.getElementById('f-tier').value = v;
   document.getElementById('f-tier-seg').innerHTML = [...TIERS, ''].map(t =>
-    `<button type="button" class="${v === t ? 'on' : ''}" onclick="setTierField('${t}')"><span class="tier ${tierCls(t)}">${tierLabel(t)}</span>${t ? `<span>${tierLabel(t, true)}</span>` : ''}</button>`).join('');
+    `<button type="button" class="${v === t ? 'on' : ''}" onclick="setTierField('${t}')">${tierDots(t)}<b class="seg-t">${tierLabel(t)}</b></button>`).join('');
 }
 function setSelField(v) {
   document.getElementById('f-sel').value = v;
@@ -2098,7 +2156,7 @@ function tierMenu(btn) {
   const id = cidOf(btn), c = getCompany(id); if (!c) return;
   const cur = c.tier || '';
   openPop(btn, `<div class="pop-title">志望度</div>` + [...TIERS, ''].map(t =>
-    `<button class="pm-item${cur === t ? ' active' : ''}" onclick="closePop();setCompany('${esc(id)}',{tier:'${t}'})"><span class="tier sm ${tierCls(t)}">${tierLabel(t)}</span>${t ? `<span class="hint">${tierLabel(t, true)}</span>` : ''}</button>`).join(''), { width: 220 });
+    `<button class="pm-item${cur === t ? ' active' : ''}" onclick="closePop();setCompany('${esc(id)}',{tier:'${t}'})">${tierDots(t)}${tierLabel(t, true)}</button>`).join(''), { width: 220 });
 }
 function statusMenu(btn) {
   const id = cidOf(btn), c = getCompany(id); if (!c) return;
