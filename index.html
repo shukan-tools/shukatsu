@@ -123,8 +123,6 @@
   .search svg.i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--faint); }
   .search input { width: 100%; height: 38px; padding: 0 34px 0 36px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 13px; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
   .search input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(20,184,166,0.15); }
-  .search kbd { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: inherit; font-size: 11px; color: var(--faint); border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; line-height: 17px; pointer-events: none; }
-  .search input:focus + kbd, .search input:not(:placeholder-shown) + kbd { display: none; }
   /* 白い板（::before）が左右に滑って移動する */
   .view-switch { position: relative; margin-left: auto; display: inline-grid; grid-template-columns: 1fr 1fr; background: #E9EBED; border-radius: 999px; padding: 3px; height: 38px; }
   .view-switch::before { content: ''; position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); border-radius: 999px; background: var(--surface); box-shadow: 0 1px 3px rgba(17,20,24,0.12); transition: transform 0.28s cubic-bezier(0.3, 0.7, 0.2, 1); }
@@ -425,7 +423,6 @@
     .toolbar { margin-bottom: 14px; }
     .toolbar .btn-add { display: none; }
     .search { order: 10; flex: 1 1 100%; max-width: none; }
-    .search kbd { display: none; }
     .btn-filter-label { display: none; }
     .rows { background: transparent; border: none; border-radius: 0; overflow: visible; display: grid; gap: 10px; }
     .row { grid-template-columns: 38px minmax(0, 1fr) auto; grid-template-areas: "tier main more" ". status date" ". action action"; gap: 8px 12px; padding: 14px 10px 14px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
@@ -782,8 +779,6 @@
   @keyframes fd-pulse { 50% { opacity: 0.4; } }
   @media (prefers-reduced-motion: reduce) { .fd.cur { animation: none; opacity: 0.6; } }
 
-  /* 企業の一覧の「選考準備中」「選考中」：白地・枠なし・黒文字にそろえる */
-  .crow > .badge.s-prep, .crow > .badge.s-active, .row > .badge.s-prep, .row > .badge.s-active { background: #fff; color: var(--ink); box-shadow: none; border: none; }
 
   /* ══ 白ベース：背景は真っ白、カードは細い線の不透明な白。すりガラスは使わない ══
      （緑の背景に戻すときは、このまとまりを消す） */
@@ -798,16 +793,16 @@
   .trow, .crow, .row { border-bottom-color: #EEF0F2; }
   .rows .trow:hover, .rows .crow:hover, .rows .row:hover { background: #F7F8F9; }
   /* 切り替えは黒い板に白文字 */
-  .view-switch { background: #F1F2F4; }
+  .view-switch { background: #fff; }
+  .view-switch button { color: #111418; }
   .view-switch::before { background: #111418; box-shadow: none; }
   .view-switch button.active { color: #fff; }
   /* 進み具合は黒。これからの分は薄いグレー */
   .fd { background: #E3E6E9; }
   .fd.done, .fd.cur { background: #111418; }
-  /* 締切と選考中の札：薄いグレーに黒文字 */
+  /* 締切の札の土台 */
   .dl-pill, .dl-today, .dl-yellow, .dl-green, .dl-over { background: #F1F2F4; color: #111418; }
   .dl-none { background: transparent; color: var(--faint); }
-  .crow > .badge.s-prep, .crow > .badge.s-active, .row > .badge.s-prep, .row > .badge.s-active { background: #F1F2F4; color: #111418; }
 
   /* 区切りをはっきりさせる：線をやめて影で浮かせ、1件ずつ独立したカードにする。見出しは札をやめて太字に */
   :root { --glass-edge: transparent; --glass-shadow: 0 1px 2px rgba(17,20,24,0.05), 0 8px 24px rgba(17,20,24,0.08); }
@@ -886,7 +881,6 @@
     <div class="search">
       <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>
       <input type="text" id="search-input" placeholder="企業名・やること・メモで検索" oninput="render()">
-      <kbd>/</kbd>
     </div>
     <button class="btn btn-ghost" id="btn-filter" onclick="filterMenu(this)">
       <svg class="i" viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8Z"/></svg><span class="btn-filter-label">絞り込み</span><span class="count num" id="filter-count"></span>
@@ -1671,7 +1665,7 @@ function companyRowHtml(c, today) {
       <div class="r-title"><button class="r-name" onclick="openDetail(cidOf(this))" title="詳細を開く"><span>${esc(c.company)}</span></button></div>
       <div class="r-sub">${sub}</div>
     </div>
-    <button class="badge ${st.cls}" onclick="statusMenu(this)" title="状況を変更">${st.label}${ICON.chev}</button>
+    <button class="badge ${st.cls}" onclick="statusMenu(this)" title="状況を変更">${st.label}</button>
     <div class="c-flow">${flowMiniHtml(c)}</div>
     <button class="r-more" onclick="openDetail(cidOf(this))" title="詳細を開く" aria-label="詳細">${ICON.right}</button>
   </div>`;
