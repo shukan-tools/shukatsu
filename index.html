@@ -372,7 +372,7 @@
      白の上で、S を左下から丸い先端で描いていき、描いた勢いのまま先端がちぎれて点になる。
      点はばねのように揺れながら止まり、その間に緑に。最後に左下が右上から緑に塗られて、ホーム画面へ */
   #splash { display: flex; position: fixed; inset: 0; z-index: 1000; align-items: center; justify-content: center; padding-bottom: 6vh;
-    background: #fff; overflow: hidden; transition: opacity 0.5s ease, visibility 0.5s; }
+    background: #fff; overflow: hidden; transition: opacity 0.35s ease, visibility 0.35s; }
   .sp-mark { position: relative; width: clamp(84px, 9vw, 112px); aspect-ratio: 1; }
   .sp-mark svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: visible; }
   .sp-color { clip-path: polygon(-15% 0, 200% 0, 200% 100%, 85% 100%); }
@@ -1153,7 +1153,13 @@ const FREE_LIMIT = 5;            // 無料版で登録できる社数
 const PRICE_LABEL = '480円';
 const BOOTH_URL = '';            // BOOTH の商品ページ URL（出品したら入れる）
 // 解除コードそのものは載せず、ソルト付き SHA-256 だけを持つ
-const LICENSE_HASH = '673bb5587adfb04e21ae4f17c1ca9b5015e828014face637b22b68d11ebcc32a';
+// コードは定期的に変える（tools/rotate-code.js が下の一覧を書きかえる）。
+// until がある古いコードは、その日まで使える（変えた直前に買った人のための猶予）。一度解除した人はずっとフル版のまま
+// ROTATE-BEGIN
+const LICENSE_KEYS = [
+  { hash: '673bb5587adfb04e21ae4f17c1ca9b5015e828014face637b22b68d11ebcc32a', until: null },
+];
+// ROTATE-END
 let isPro = lsGet(LS_LICENSE_KEY) === 'pro';
 const MARK_SRC = document.querySelector('link[rel=icon]').href;
 
@@ -2376,7 +2382,7 @@ async function redeemCode() {
   const norm = document.getElementById('pay-code').value.normalize('NFKC').toUpperCase().replace(/[^A-Z0-9]/g, '');
   const msg = document.getElementById('pay-msg');
   let ok = false;
-  if (norm) { try { ok = (await sha256hex('shukan:v1:' + norm)) === LICENSE_HASH; } catch (_) {} }
+  if (norm) { try { const h = await sha256hex('shukan:v1:' + norm); const today = todayStr(); ok = LICENSE_KEYS.some(k => k.hash === h && (!k.until || today <= k.until)); } catch (_) {} }
   if (!ok) {
     msg.textContent = norm ? 'コードが正しくありません。もう一度確かめてください' : '解除コードを入力してください';
     msg.classList.add('err');
@@ -2830,7 +2836,7 @@ centerInk(document.body);
 // フォントの読み込みが終わったら測り直す
 document.fonts.ready.then(() => { for (const k in inkCache) delete inkCache[k]; centerInk(document.body); });
 
-// 起動画面：ロゴの動き（約3秒）が終わったら消してホーム画面を出す
+// 起動画面：ロゴの動き（約2.5秒）が終わったら消してホーム画面を出す
 // S をなぞる速さ：まっすぐな所は速く、曲がる所はゆっくり。境目はなめらかにつなぐ
 function traceFrames(path) {
   const d = path.getAttribute('d');
@@ -2896,13 +2902,13 @@ function springFrames() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches || !splash.animate) { finish(1200); return; }
   const GREEN = '#14B8A6';
   const trace = splash.querySelector('.sp-trace'), bud = splash.querySelector('.sp-bud'), dot = splash.querySelector('.sp-dot'), color = splash.querySelector('.sp-color');
-  const SPEED = 1.2, sp = ms => Math.round(ms / SPEED);                    // 全体の速さ（1.2倍速）
-  const T0 = sp(250), TRACE = sp(1650);                                          // S を描く（曲がる所はゆっくり）
+  const SPEED = 1.5, sp = ms => Math.round(ms / SPEED);                    // 全体の速さ（1.5倍速）
+  const T0 = 80, TRACE = sp(1650);                                             // S を描く（曲がる所はゆっくり）
   const dotFrames = springFrames();
   const SPLIT = T0 + TRACE - sp(30), SPLIT_D = sp(dotFrames.duration);           // 描いた勢いのまま点がちぎれ、揺れながら止まる
   const TINT = SPLIT + sp(dotFrames.peak), TINT_D = SPLIT_D - sp(dotFrames.peak); // 揺れている間に点が緑に
-  const WIPE = TINT + TINT_D - sp(50), WIPE_D = sp(600);                          // 左下が右上から緑に
-  const END = WIPE + WIPE_D + sp(450);
+  const WIPE = TINT + 150, WIPE_D = sp(600);   // 左下は、点が緑になり始めて少ししてから右上から緑に
+  const END = WIPE + WIPE_D + sp(300);   // 完成形を少し見せてから閉じる
   trace.animate(traceFrames(trace), { duration: TRACE, delay: T0, fill: 'both' });
   trace.animate([{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'scale(1)' }], { duration: sp(160), delay: T0, easing: 'ease-out', fill: 'both' });
   bud.animate([{ opacity: 1 }, { opacity: 1, offset: .55 }, { opacity: 0 }], { duration: sp(500), delay: SPLIT });
