@@ -2830,7 +2830,7 @@ centerInk(document.body);
 // フォントの読み込みが終わったら測り直す
 document.fonts.ready.then(() => { for (const k in inkCache) delete inkCache[k]; centerInk(document.body); });
 
-// 起動画面：ロゴの動き（約3.6秒）が終わったら消してホーム画面を出す
+// 起動画面：ロゴの動き（約3秒）が終わったら消してホーム画面を出す
 // S をなぞる速さ：まっすぐな所は速く、曲がる所はゆっくり。境目はなめらかにつなぐ
 function traceFrames(path) {
   const d = path.getAttribute('d');
@@ -2896,15 +2896,16 @@ function springFrames() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches || !splash.animate) { finish(1200); return; }
   const GREEN = '#14B8A6';
   const trace = splash.querySelector('.sp-trace'), bud = splash.querySelector('.sp-bud'), dot = splash.querySelector('.sp-dot'), color = splash.querySelector('.sp-color');
-  const T0 = 250, TRACE = 1650;                                          // S を描く（曲がる所はゆっくり）
+  const SPEED = 1.2, sp = ms => Math.round(ms / SPEED);                    // 全体の速さ（1.2倍速）
+  const T0 = sp(250), TRACE = sp(1650);                                          // S を描く（曲がる所はゆっくり）
   const dotFrames = springFrames();
-  const SPLIT = T0 + TRACE - 30, SPLIT_D = dotFrames.duration;           // 描いた勢いのまま点がちぎれ、揺れながら止まる
-  const TINT = SPLIT + dotFrames.peak, TINT_D = SPLIT_D - dotFrames.peak; // 揺れている間に点が緑に
-  const WIPE = TINT + TINT_D - 50, WIPE_D = 600;                          // 左下が右上から緑に
-  const END = WIPE + WIPE_D + 450;
+  const SPLIT = T0 + TRACE - sp(30), SPLIT_D = sp(dotFrames.duration);           // 描いた勢いのまま点がちぎれ、揺れながら止まる
+  const TINT = SPLIT + sp(dotFrames.peak), TINT_D = SPLIT_D - sp(dotFrames.peak); // 揺れている間に点が緑に
+  const WIPE = TINT + TINT_D - sp(50), WIPE_D = sp(600);                          // 左下が右上から緑に
+  const END = WIPE + WIPE_D + sp(450);
   trace.animate(traceFrames(trace), { duration: TRACE, delay: T0, fill: 'both' });
-  trace.animate([{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 160, delay: T0, easing: 'ease-out', fill: 'both' });
-  bud.animate([{ opacity: 1 }, { opacity: 1, offset: .55 }, { opacity: 0 }], { duration: 500, delay: SPLIT });
+  trace.animate([{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'scale(1)' }], { duration: sp(160), delay: T0, easing: 'ease-out', fill: 'both' });
+  bud.animate([{ opacity: 1 }, { opacity: 1, offset: .55 }, { opacity: 0 }], { duration: sp(500), delay: SPLIT });
   dot.animate(dotFrames.frames, { duration: SPLIT_D, delay: SPLIT, fill: 'forwards' });
   dot.animate([{ fill: '#000' }, { fill: GREEN }], { duration: TINT_D, delay: TINT, easing: 'ease-in-out', fill: 'forwards' });
   color.animate([
