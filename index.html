@@ -369,19 +369,24 @@
   .done-mark svg.i { width: 20px; height: 20px; stroke-width: 3; }
   @keyframes done-pop { from { transform: scale(0.4); opacity: 0; } }
   /* ── 起動画面（スマホ・パソコン共通） ──
-     白の上に小さなマークがふわっと出て、ゆっくり呼吸するように動く。3秒で静かに消えてホーム画面へ */
+     白の上で、S を左下から丸い先端で描いていき、描いた勢いのまま先端がちぎれて点になる。
+     点はばねのように揺れながら止まり、その間に緑に。最後に左下が右上から緑に塗られて、ホーム画面へ */
   #splash { display: flex; position: fixed; inset: 0; z-index: 1000; align-items: center; justify-content: center; padding-bottom: 6vh;
     background: #fff; overflow: hidden; transition: opacity 0.5s ease, visibility 0.5s; }
-  .sp-mark { display: block; width: clamp(56px, 5vw, 68px); aspect-ratio: 1;
-    animation: sp-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both, sp-breath 1.6s ease-in-out 0.75s infinite; }
+  .sp-mark { position: relative; width: clamp(84px, 9vw, 112px); aspect-ratio: 1; }
+  .sp-mark svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: visible; }
+  .sp-color { clip-path: polygon(-15% 0, 200% 0, 200% 100%, 85% 100%); }
+  .sp-bud, .sp-dot, .sp-color { opacity: 0; }
+  .sp-dot { transform-box: fill-box; transform-origin: center; }
+  .sp-trace { transform-box: view-box; transform-origin: 31px 125.5px; }
   #splash.hide { opacity: 0; visibility: hidden; }
-  @keyframes sp-in { from { opacity: 0; transform: scale(0.94); } }
-  @keyframes sp-breath { 50% { transform: scale(0.93); opacity: 0.75; } }
   /* 起動画面が出ている間、後ろの画面は隠しておき、起動画面が消えるのに合わせて少し下からふわっと出す */
   .topbar, main.content, .fab { transition: opacity 0.6s ease 0.1s, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s; }
   #splash:not(.hide) ~ .topbar, #splash:not(.hide) ~ main.content, #splash:not(.hide) ~ .fab { opacity: 0; transform: translateY(14px); }
   @media (prefers-reduced-motion: reduce) {
-    .sp-mark { animation: none; }
+    /* 動きを減らす設定のときは、完成したマークをそのまま出す */
+    .sp-trace { opacity: 1; stroke-dashoffset: 0; }
+    .sp-dot, .sp-color { opacity: 1; fill: #14B8A6; clip-path: none; }
     #splash:not(.hide) ~ .topbar, #splash:not(.hide) ~ main.content, #splash:not(.hide) ~ .fab { transform: none; }
   }
   /* 締切管理⇔企業管理を切り替えたとき、指を動かした向きから中身が入ってくる */
@@ -852,7 +857,30 @@
 </style>
 </head>
 <body>
-<div id="splash" aria-hidden="true"><img class="sp-mark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJcAAACXCAYAAAAYn8l5AAAQAElEQVR4AexdCXhOxxr+JvsmJCKRIiIoohIiRBBEJeUGV2spqqQU7bVv1T55ehu3VVVqqaatpgjRaFG1lUhssaYRaxCEWCJChCRkkc3c+f7rf24a/MlZ//P/OR6Ts818837vef85c2bmzJiA+k9lQCIGVHFJRKxqFkAVl6oCyRhQxSUZtaphVVyqBiRjQBWXZNSqhg1eXA8ePKAJCQn0hx9+oDNmzKAjRoygAQEBtF27dtTDw4O6ublRBwcH3sHFxUVjp0uXLnTkyJF04cKF9K+//qJKkk5uaQndeTeD/vvSKTr85EEacORP6pOwnXod3Eq7HN5J/5m0l866kESjM67SG0WPZcNucOLKzs6ma9eupWPHjqWvvvoqrV+/PvTs2RM+/PBDWLp0KWzYsAEOHz4MKSkpkJ6eDrdu3YLc3Fze4d69exo7iYmJEBMTA3PnzgU/Pz9wdXWlc+bModevX5ftZlUVdGz2bfrOyQTqeeAPCD1zGL6/cQn23r8DqQX5cKu4AO48KYKrhY/g6MNsWJtxFWZcSALfQzug97HdNPLmZVpYXiYpdoMQ1927d+k333xDu3btShs2bAhjxoyB1atXw5UrV6ryLdtxVlYWLFq0CJjAYdy4cRQxypU5ExANOLqLjjp1CPbcz4Qy+pRT1uce5cInqSehw6HtEHE9VTKBKVpccXFxdODAgbRJkyYwa9YsOHbsGDx9yo1ITqzziFxWVgarVq2C1q1bQ1RUlGQ3CqHh42/cmSN0+MmDkPo4D08JCg9LS+Czy6cBH6Mpjx6Kjl2R4lq/fj319vamwcHBsH37dsAbKIhFGRLn5eVBaGgovPfee7SkpET0G4U3v/fxWNh295bo3qSyx2jfxHiIuX1NVNyKEteOHTs0FfFRo0bB2bNnRSdRDoNr1qyB/v37Q0FBgWg36siDe3Rg0j7IKC6UzIWSpxUw9fxfsOTaedFwK0JcaWlpNCgoiA4YMEBTEZeMQZkMx8fHw+DBg0GMEuxUXg5951QCPC4vkwX9l2nn4DuR6mF6F9fnn3+OpRXgDZGFPUkyed7onj17YPLkyc9f4HAms7iQjmDCKqwo55BKeNR5l08DNm0ItaQ3ceErPL79ffrpp/DkyROhfigyfWRkJPzyyy+8HzMTzh2DB6zSLbdzCHgae0TeKhL2aNeLuFglnbZv317z9ic3cXLnN23aNMjJycH7xSnrn25cpn/l3ueURszI+eWlMPviCUEmZRfX/Pnz6aBBgyA/P18QcENJzIQF4eHhnOCyJgL61dVznNJIEXl/ThbEZ2dy/mFoscgqLmxVDwsLU1xblZYMqbY///wzZGbW/Cax1nN4JFMFvjqfF187X12Ul16XRVz41jR06FCKreovRWLEF7BOGcnqXzV1ce3tqzWNKnm8k/kP4FQe98c6ApNFXMOGDYNNmzZhfrU2REdH18j3OPYYyi5R1gvOxjs3aoS9aiTJxYUt1tu2bauarxjHBmXj2rVrkJpafT9ePOt4Vppj2H/JB5Ok4mL9gRRbrPkAM8Y0Bw4cqNatow/vVRtH7gjYM8CnWUIyca1btw5HMsjNg6LzO39ed+W4pKKCphc9VqQPqQV5nHFJIq4TJ07Q8ePHcwZj7AmqGyJ0s7gAyinvN39J6UsvKuBsX3RxYYctdjyzN0TOYIw9QW5urk4X88pKdV7X50U+2EQX19SpU+Hy5cv65EGxeRcW6h7V8ORphWKxF/Ho3zQR0xtWYVUr8DoItbW11XEVwMrEVOd1fV60MTXjnD1ncb0sh+LiYjphwgSgCq0zvAy3nOcdHBx0ZlfP3ELndX1e5INNNHEtXrwY0tLS9Om/4vNu0aKFToxNre3AjBCdcfR1sZmNHeesRREXfpGDHytwzr2WJWjXrp1Ojy1NTYmHTR2dcfR10dOuHuesRRHX/Pnz4dGjR5wzr20JAgMDq3W5m6NLtXHkjtDE2hbcbOw4F6mCxYWl1k8//SS3vwaXn4eHB3h6elZ7g4IavKI434J5YhIsroiICGCVecURojRA7777bo0gBTs3Is6WVjWKK1ekYa8045WVIHE9efKEfv/997wyrk2JrKysgEuPxZjGuiv+4nKn25q3vSN0rOdUbYn7IiuCxLVjxw64f19/Q3Ff5JASz40bNw4aN25c4xs0oWkrsDczV4QrH7fQ/RKiC6QgcUVFRemyrV5jDDg6OnIe5uxgYUk+buHFUuv3f6CTKwSxxzRfFLzFlZOTQ/HzKb4Z15Z03377LTRo0KDGpZaWlwnurUjneg20h7JvseRc7OkrKF/e4tq9ezeUl5cLytzYE7///vvAOvE5C0vLy0/eXcHRwlJ7KNsWAS9/zQ+a2tTBXd758hbX9u3beWdaGxJim9Z3330nyNXG1rbkV5+eYMujX09Ixv9+tT0MaOgmSFiYP29x7du3D9Or4QUM9O7dG3BoN3tLFHyDfNibWrRPD7CTqYI/l1Xgp3hU3x73ArefO8VLXBcuXKAPHz58zph6AmD06NGwa9cusLe31yUsTlT1qN+QbOv0OmBLOaeEHCJbmpjCsradYU6LdqLh5iWuo0ePcoBdO6LWrVtXM0/XunXriBglVlXWvOs6kn3+fWGAS5OqlwQft7arC7v9gmBUkxaiCQtB8RLX6dOnMa0aGANmZmYQGhoKly5dwhkGRb05zPzf/rPKPVnTIYDEsHpYGyaIv13kceBobgnhrTrAke4hxIuJl4cJnUl4iSs1NVWn0dpwsWHDhjBjxgzNqFvW3kdcXV0lFVZlTrGL6DATxNoOAYB9kVyH6bStUw/mt/aBUz0HwuRmbSTDzUtc+Cut7KyS901NTcHBwUFQaNasGXTo0AHefvttwBEgx48fh7t375KlS5eS5s2bS3ZzquM1xKUJ2dCxF7kQ+Casbt8dJrKWfWz4bGlrD65W1uBkYQXuNnbQxaEBjGrcHBZ7doKkgP6Q0O0fZKJ7a8JeEiTFblKdA1Wvl5SUUJzhuOp5JR2joCZNmgTnzp2DiooKkpubKyhcv36dsKoA+e2330hYWBjx9/eX9KZw5bK+hRUZ2NCNzG/TkWzyDSTHA/qTlF5vkku93yLJPQaSnX5BZNlrfiTUrSXxsBXvRaM6nCbVRah6nf1iFT2U2dLSUvO2FhERQby8vBQlgqpcGvsxL3EpmZSvv/4a3njjjReKSsm4jREbZ3FV93mUPklilWr44IMP9AlBzbsSA5zFxepclZIrazcoKAjYY1EttRRyWziLq7RUuV8FY8mlEF5VGIwBzuKysFDut3WZmZnMJfW/UhjgLC722FEK9udwxMbG4nh+Zc7k8Rxa4z/BWVx2dnaKZSUnJweWL1+uWHy1DRhncWG3ByeSZI6M89pv2bJFLb1k5v1F2XEWl5ubGzEx4ZzsRXlLcg4XocKlUUaPHk2PHDlC8/PzVaFJwnT1RnmpROmlF06Gsm7dOujevTvgUBhGAwpMUcHc3JyyPk/q5OSkWZQ0ICCADh8+nM6dO5cy7DQ5OZnip3sMu8H+5yUuXFvQYD1WCHAsYVmfJ66uoVmUFFe3/fXXX2HhwoWaAYe+vr5Qr149QNF98skn9ODBg/jjUAj6msHgJa42bdrUzLoaSxADrOTSLKm8YMEC6NWrF9SvX5/i437v3r0GITRe4vLx8RFEmpqYHwMPHjwA9siEPn36QNOmTSmu+MbekBUrNF7i6tatGz921FSiMXDz5k3AN2P2ggWTJk2iGRkZcomsxj7wEhercxFnZ+caZ6JGlI6BoqIiiIiIgObNm8OECRNwrJ1iRMZLXEgVdhLjVg3KYAD7fHEqK/bDh2XLlilCYLzF1b9/f2WwqqL4GwP4Bjp9+nTo0aMHvXr1ql5Fxltcffv2BSV3Yv+N8Vp4cOjQIc24/5UrV+pNYLzFxRoASUhISC28bYbj8uPHj2HixIn46ZteGmR5iwspHjNmDG7UoHAGoqKiNO1kd+7ckbUUEySuQYMG4fd6CqfWOOAJ9SIxMRH8/f3xO0vZBCZIXOjwlClTcKMGA2AA28ZYRR/OnDkji8AEiws/iFDyGC8DuOeyQsRvTrEr6fTp05ILTLC4HB0dCWshlpUgNTNhDOTl5eHnd3Dp0iVJBSZYXOjmxx9/DExkuKsGA2EgOzsbBgwYAKy/UjKBiSIubJZAgRkIryrMZwzgWk3Dhg17diT+RhRxIaxp06aBp6cn7qrBgBjAGSJnzpwpSeklmrgsLS0Jaw0GQozom1QDEokQqEuXLoWdO3eKLjDRxIXOBQQEqJV7JMLAAg4Lx5mnWT1MVIGJKi7kFJfG8/LS/wT9iEUNNWcAZy+aNWtWzRPUIKbo4rK2tibr168HW1vbGmSvRlESA9HR0RAfHy9a6SW6uJAsVnKRKNafRYha/0I+DCmI2eMiibiQzKFDh5LPPvsMd9VgQAywhlWIjIwUpfSSTFzIZ3h4OMHuIdxXg+EwMG/ePFHm3JBUXEjnjz/+SEaOHIm7NQxqNH0zcPv2bVi7dq1gGJKLCxHGxMQQXHMQ99VgGAwsWbJEMFBZxIUoV61aRXDedtxXg/IZuHLliuCGVdnEhXSylmBNK765uTkeqkHhDKxZs0YQQlnFhUgnTpxI4uLiQP3uEdlQdni2zDTvN0fZxYV0BgYGkpSUFFA/T0M2lBvwW8jff/+dN0C9iAvRuri4ENZZSnDBS3t7ezylBgUygKUXX1hacfFNLzjd5MmTycWLF2HIkCGCbakGxGdg//79UFBQwOvRqHdxIR2NGzcmmzdvJrhgU8+ePfGUGhTCQHFxMRw7dowXGkWIS4vc39+fJCQkkD///BNUkWlZ0f+W7+KtihKXlsaQkBCNyJKSkgA/vFVHWGiZ0c8Wnyh8clakuLSOdO7cmbBuCJKVlQWrV68GJjqwsrLSXla3MjFw9uxZXjkpWlxaj9jbJBk7diw+LklOTg5s3boVsLWfiQ9wGWBtPHUrDQP4reP9+/c5V+oNQlyVKbOzsyM4jQC29rPHJsFV1M6cOQMbNmyA8PBwzcQb+MkUq79Bx44doVWrVuDh4aG40KhRI5B0yvXKpImwn5qaytmKwYmrqof4YUj79u3JiBEjCBMXdi8R1jaDb57k5MmT5PLlyyQ9PV1xITMzU/PDwFG7KP6qfintOCMjgzMkgxcXZ48VlACHhI8aNYokJydDly5dFITseShY733+rO4zqrh08yPLVUdHR7Jp0yZ4tiCDLHlyzQTrXVzTqOLiyphE8Zs0aUKw2UUi84LN4sS+XI2o4uLKmITxg4ODJbQuzDQuuMDVgiouroxJGJ915ktoXZhpHCHB1YIqLq6M6Ywv7CJOzibMgnSp2Vs5Z+OquDhTJl0CIWOnpEP1P8vszfZ/Oxz+quLiQJaUUU+cOEGVLC7WeM3ZfVVcnCkTP0FKSgrFBUj51GvER/Nii3zW2NS7uHJLS2htDHezs2liYiLFubGwAfXWrVsvvqsKOevq6soZvEpswwAAB01JREFUiWziOpWXQ5elX6DvnEygnQ/toI3ifqNOsTG05f7fwZhD6wNb4B+H/oR3Nq6Ft8LDoOewwdCsmTs0dHbWtMrj94HYP8r5zsmcwN3dnXOOkorrUVkpXc4EhWIKToyDL66chT33MyG96DGUPK3gDNZQEliZmoJPuQl4xh+HJ6Ez4Hift2DXqAlw4MvFcG7rTsjLzDIUVzQ4CSHAZwFXycS1Iv0i7ZCwHT5ngkIxaVBK80cxVluaWoLX8XOQP3ISxPUfDoe+WQH5WXcVg48vEDc3N6hTpw7nKYtEF9elx3k04OguOu/KGcgvL+Xrj8GkM2G/6g4VpuC+fhscDxoM++d9BY/v5xgM/poA9fHxqUm05+KIKq5tWTcpPv5SH+c9l5ExnvAmFuCyYi3Eh7wNyet/M0YXNT5169ZNs+X6RzRxRd1Ko+PPHYOiinKuGAwufkszK2gWsxP2vTEEUnbGGhx+roC7du3KNYkmviji2nznBv0oNRmeUs4jYTUgDOWPNauo+167A0n93oYT62IMBbYgnI6OjsDExbm+hZkKFlcya2KYej7R6IXlTc2Azv4CYifNhoqyMuSuVoR+/frx9lOQuLCpYfzZo1D69ClvAEpPiM0Kvuevw/6Q4XD7bIrS4YqOb+DAgbxt8hYX5vhl2jnIKC7EXaMM7uZWYL84EmJnhwE14h/Qy26evb29oMlieIvrasEjuiYj7WW4DP68b5kJpA4eCxf37DV4X/g6MHz4cJzynVd9C/PkLa7l1y9ChRFW4LHdqntWHuz550gozMtDjmptEDrVKC9x5ZWV0C1ZN42OdKxftYo9Clvf+1etfAxWvqHdu3cHPz8/3qUW2uIlru13M4yub9De1Bxc1vwOh5d+h7zU+jB79mzBHPAS1/6cLMEZK8lAfTMLsF4aCSdjNioJlt6weHl5AX7VLhSACR8Dx3Kz+SRTZJoGTFjlny2GC7viFIlPPlD/z2nBggX/PxCwx1lc954U04elJQKyVE5SBzNzKPt8GVw7mqgcUHpG0qtXLwgJCRFU19K6wFlcN4sLtGkNeuvASiyrJT/D1YQjBu2HmOAtLCwgIiJCNJOcxfWo3PC7PrCP0Ob7dZCya49oRBqDoY8++gjatm0rSqmFfHAWl6GPIMV2rGaxR+Dslu3ovxqeMYCV+LCwsGdH4mw4i8va1EycnPVkxedyhmaEqJ6yV2S2OFtjdHQ0WFtbi1ZqoaOcxeVoboHpDDL4FpZD7NSPDBK7lKCXL18O3t7eogoL8XIWV3ObOiA6CkQicWjGOqEPvz9N4lw4m9d7gkmTJuFsjJLcUs7iqmNuQZra2OmdFC4A7NijPC98MRTm5nJJZvRx+/TpA+ztUBJhIXmcxYWJuju64MZggvu+REg7zG+ifoNxkiPQTp06wZYtWzim4hadl7j6OjfiloseY3csBTj4lfCFKfXoguhZs+YG2L17N9jb20tWaiFonuJqTJwslD8fvJO5BZyc9gn6qYZnDOAM1wcOHAAnJydJhYXZ8RIXJnzfrSVuFB2cdyVAznXjGxrEl/TAwEBAYTk7O0suLMTIX1xNXwUHVjKgESWGDhUmantWpRszfvx4iI2NlfxRWClL4C2ueuaWJKyld2Vbitm3MDGBa1+8vJ6lGKAyAMEZAdkbIURGRhK2L0uJpXWLt7jQQKhbS9KzfkPcVVTwznwI6ceTFIVJH2Bat24NuCgUa8uSVVRaXwWJC4384OUPrlbWuKuI0MDcEg7P+VQRWPQFAtdDmjlzJpw6dQp8fHz0Iiz0XbC4nC2tycaOgYqpfzVNSYOCnAfoW60MuNhWUlISLFmyhNjY2OhNWEi+YHGhkTZ16pFNvoGg7+YJbHo4HP4VQqp1wd3dHVauXAlMWESfpVVl4kURFxpsX7c+2eXXBzzr1MNDvQT389dq3edgr732GkRFRcGNGzfIxIkT9VpSVb3pookLDXvY2pM9fsEwnjVTmBJ5/cSvd478ZyHCMPpgYWEBb775pqaV/fz58yQ0NFResmvIsKjiwjytzczIgja+ZE+XYAh0qjRJK16UMLTKyYeCBw8lzEG/ps3NzeH111+HFStWwO3bt+GPP/4g/fr1U6SotEyJLi6tYXxMsnoY2ev/Box1awmO7C1Oe03sLTKcHhkttlm92sPSydfXF6ZPnw6bN2+G7Oxs2LdvH5kyZQqRq4VdKAGSiUsLDEX2tWcncuX1wSSeCe3L1h0htEkLCGrwCvg7OIO3vaPgEGzjAHb5BYD9ZoYSUDg45AUXkxoxYoRGRIsWLYKNGzfChQsXoLS0FNdhJMuWLSNDhgwhDg4ORMupoWwlF1dlIjqwSv8E91ZkcdvOZEPHXmSHXx+yr2tfweGXHv00q8LiyrCGEpKTk8nevXtJXFwc2bBhg0ZEc+bMIcOGDSNtRfxIojL/cu/LKi65nVPz0y8Dqrj0y79R566Ky6hvr6TOVWtcFVe1FKkR+DKgiosvc2q6ahn4LwAAAP//gIdBRgAAAAZJREFUAwBqMg3Fm7YFhQAAAABJRU5ErkJggg==" alt=""></div>
+<div id="splash" aria-hidden="true"><div class="sp-mark">
+  <!-- 黒いS（緑の部分も最初は黒） -->
+  <svg viewBox="0 0 151 151"><defs>
+    <!-- 点が分かれるときの「くっついて伸びて、ちぎれる」感じを出すフィルター -->
+    <filter id="sp-goo" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="g"/>
+      <feComposite in="SourceGraphic" in2="g" operator="atop"/>
+    </filter>
+    </defs>
+    <!-- マークは図形で描き直したもの（拡大してもぼやけない）。S＝太さ38の線、点＝円
+         S は左下から線そのものを伸ばして描く。先端は線の太さちょうどの半円なので、いつも正円の形で進む -->
+    <path class="sp-trace" pathLength="1" fill="none" stroke="#000" stroke-width="38" stroke-linecap="round"
+      stroke-dasharray="1 2" stroke-dashoffset="1" opacity="0"
+      d="M31 125.5 L95 125.5 A25.25 25.25 0 0 0 95 75 L56 75 A25 25 0 0 1 56 25 L74 25"/>
+    <g filter="url(#sp-goo)">
+      <circle class="sp-bud" cx="72" cy="25" r="15" fill="#000"/>
+      <circle class="sp-dot" cx="118.55" cy="25" r="19.85" fill="#000"/>
+    </g>
+  </svg>
+  <!-- 色つきの層：左下の緑だけが見えてくる（黒い部分は下と同じ黒なので変わらない） -->
+  <svg class="sp-color" viewBox="0 0 151 151"><defs><clipPath id="sp-tail"><path d="M-5 105 L91.86 105 A66.6 66.6 0 0 0 44.7 168.7 L-5 168.7 Z"/></clipPath></defs>
+    <path d="M74 25 L56 25 A25 25 0 0 0 56 75 L95 75 A25.25 25.25 0 0 1 95 125.5 L31 125.5" fill="none" stroke="#14B8A6" stroke-width="39" stroke-linecap="round" clip-path="url(#sp-tail)"/></svg>
+</div></div>
 
 <header class="topbar">
   <div class="topbar-inner">
@@ -2802,15 +2830,89 @@ centerInk(document.body);
 // フォントの読み込みが終わったら測り直す
 document.fonts.ready.then(() => { for (const k in inkCache) delete inkCache[k]; centerInk(document.body); });
 
-// 起動画面：3秒出す（フォントの読み込みが遅いときも3秒で消す）
+// 起動画面：ロゴの動き（約3.6秒）が終わったら消してホーム画面を出す
+// S をなぞる速さ：まっすぐな所は速く、曲がる所はゆっくり。境目はなめらかにつなぐ
+function traceFrames(path) {
+  const d = path.getAttribute('d');
+  const svgNS = 'http://www.w3.org/2000/svg';
+  // 区切り（L＝まっすぐ、A・C＝曲がる）ごとの長さを測る
+  const tokens = d.match(/[MLCA][^MLCA]*/g);
+  let pen = '', segs = [];
+  tokens.forEach(t => {
+    const nums = t.slice(1).trim().split(/[ ,]+/).map(Number);
+    if (t[0] !== 'M') {
+      const p = document.createElementNS(svgNS, 'path');
+      p.setAttribute('d', 'M' + pen + ' ' + t);
+      path.parentNode.appendChild(p);
+      segs.push({ curve: t[0] !== 'L', len: p.getTotalLength() });
+      p.remove();
+    }
+    pen = nums.slice(-2).join(' ');
+  });
+  const L = segs.reduce((a, s) => a + s.len, 0);
+  const rawSpeed = s => { let acc = 0; for (const g of segs) { if (s <= acc + g.len) return g.curve ? 0.35 : 1; acc += g.len; } return 1; };
+  const N = 120, W = 9;  // W：速さを切り替えるときになじませる幅
+  const speed = s => {
+    let sum = 0, n = 0;
+    for (let k = -W; k <= W; k += 1.5) { const x = Math.min(L, Math.max(0, s + k)); sum += rawSpeed(x); n++; }
+    let v = sum / n;
+    v *= 0.3 + 0.7 * Math.min(1, s / 22);          // 書き出しはゆっくり加速
+    return v;
+  };
+  let t = 0; const pts = [{ s: 0, t: 0 }];
+  for (let i = 1; i <= N; i++) { const a = L * (i - 1) / N, b = L * i / N; t += (b - a) / speed((a + b) / 2); pts.push({ s: b, t }); }
+  return pts.map(p => ({ strokeDashoffset: String(1 - p.s / L), offset: p.t / t }));
+}
+
+// 点の動き：ばねのように、勢いよく飛び出して、行き過ぎて、揺れが自然に小さくなって止まる
+function springFrames() {
+  const Z = 0.55, W = 13;            // Z：揺れの止まりやすさ　W：ばねの強さ
+  let x = -44, v = 300, t = 0, prevV = v, peak = 0, settled = 0;  // 線の先端の勢い（v）をそのまま引き継ぐ
+  const pts = [];
+  for (let i = 0; t < 1.5; i++) {
+    if (i % 12 === 0) pts.push({ t, x, v });
+    const acc = -W * W * x - 2 * Z * W * v; v += acc * 0.001; x += v * 0.001; t += 0.001;
+    if (prevV > 0 && v <= 0 && !peak) peak = t; prevV = v;
+    if (Math.abs(x) > 0.2 || Math.abs(v) > 4) settled = t;
+  }
+  const end = settled + 0.02, list = pts.filter(p => p.t <= end);
+  const frames = list.map(p => {
+    const grow = 1 - 0.3 * Math.exp(-p.t / 0.07);                 // ちぎれた直後は小さく、すぐ元の大きさに
+    const st = Math.min(0.12, Math.abs(p.v) / 2500);               // 速く動いているときだけ、進む向きに少し伸びる
+    return { offset: p.t / end, opacity: 1, transform: `translateX(${p.x.toFixed(2)}px) scale(${(grow * (1 + st)).toFixed(3)}, ${(grow / (1 + st)).toFixed(3)})` };
+  });
+  frames.push({ offset: 1, opacity: 1, transform: 'translateX(0px) scale(1, 1)' });
+  return { frames, duration: Math.round(end * 1000), peak: Math.round(peak * 1000) };
+}
+
 (() => {
   const splash = document.getElementById('splash');
   if (!splash || getComputedStyle(splash).display === 'none') { if (splash) splash.remove(); return; }
-  // 3秒：起動画面を消して、ホーム画面を出す
-  setTimeout(() => {
+  const finish = ms => setTimeout(() => {
     splash.classList.add('hide');
     setTimeout(() => splash.remove(), 700);
-  }, 3000);
+  }, ms);
+  // 動きを減らす設定、または古いブラウザ：完成したマークを少し見せて閉じる
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches || !splash.animate) { finish(1200); return; }
+  const GREEN = '#14B8A6';
+  const trace = splash.querySelector('.sp-trace'), bud = splash.querySelector('.sp-bud'), dot = splash.querySelector('.sp-dot'), color = splash.querySelector('.sp-color');
+  const T0 = 250, TRACE = 1650;                                          // S を描く（曲がる所はゆっくり）
+  const dotFrames = springFrames();
+  const SPLIT = T0 + TRACE - 30, SPLIT_D = dotFrames.duration;           // 描いた勢いのまま点がちぎれ、揺れながら止まる
+  const TINT = SPLIT + dotFrames.peak, TINT_D = SPLIT_D - dotFrames.peak; // 揺れている間に点が緑に
+  const WIPE = TINT + TINT_D - 50, WIPE_D = 600;                          // 左下が右上から緑に
+  const END = WIPE + WIPE_D + 450;
+  trace.animate(traceFrames(trace), { duration: TRACE, delay: T0, fill: 'both' });
+  trace.animate([{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 160, delay: T0, easing: 'ease-out', fill: 'both' });
+  bud.animate([{ opacity: 1 }, { opacity: 1, offset: .55 }, { opacity: 0 }], { duration: 500, delay: SPLIT });
+  dot.animate(dotFrames.frames, { duration: SPLIT_D, delay: SPLIT, fill: 'forwards' });
+  dot.animate([{ fill: '#000' }, { fill: GREEN }], { duration: TINT_D, delay: TINT, easing: 'ease-in-out', fill: 'forwards' });
+  color.animate([
+    { clipPath: 'polygon(-15% 0, 200% 0, 200% 100%, 85% 100%)' },
+    { clipPath: 'polygon(-92% 0, 200% 0, 200% 100%, 8% 100%)' },
+  ], { duration: WIPE_D, delay: WIPE, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'both' });
+  color.animate([{ opacity: 1 }, { opacity: 1 }], { duration: WIPE_D, delay: WIPE, fill: 'forwards' });
+  finish(END);
 })();
 
 // ── オフラインで開けるようにする（PWA） ───────────────
