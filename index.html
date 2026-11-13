@@ -870,6 +870,12 @@ if (location.protocol === 'https:' && window.top !== window.self) {
   html, html.at-bottom { background: #F4F5F7; }
   body { background-color: #F4F5F7 !important; }
   body::before { background: #F4F5F7; }
+  /* データの安全について */
+  .safe-list { list-style: none; padding: 2px 10px 6px; margin: 0; }
+  .safe-list li { position: relative; padding-left: 14px; font-size: 12.5px; line-height: 1.6; color: var(--ink); margin-bottom: 4px; }
+  .safe-list li::before { content: ''; position: absolute; left: 2px; top: 0.62em; width: 6px; height: 6px; border-radius: 50%; background: #14B8A6; }
+  .safe-list.caution li { color: var(--muted); }
+  .safe-list.caution li::before { background: #C5CAD0; }
 </style>
 </head>
 <body>
@@ -2348,6 +2354,8 @@ function dataMenu(btn) {
     <button class="pm-item" onclick="closePop();exportAllIcs()">これからの締切をカレンダーに書き出す</button>
     <div class="pm-note">書き出したファイルを開くと、Googleカレンダーやスマホのカレンダーに入り、前日に通知が届きます。</div>
     <div class="pop-sep"></div>
+    <button class="pm-item" onclick="safetyInfo()">データの安全について</button>
+    <div class="pop-sep"></div>
     ${isPro
       ? '<div class="pm-note">プラン：フル版（社数無制限）</div>'
       : `<div class="pm-note">プラン：無料版（${FREE_LIMIT}社まで）</div><button class="pm-item" onclick="closePop();openPaywall()">フル版にする・解除コードを入力</button>`}`, { width: 280 });
@@ -2362,6 +2370,24 @@ function exportBroken() {
   a.href = url; a.download = 'shukatsu_unreadable_data.txt'; a.click();
   URL.revokeObjectURL(url);
   if (confirm('ファイルに保存しました。アプリの中に残している控えを消しますか？')) { try { localStorage.removeItem(LS_BROKEN_KEY); } catch (_) {} }
+}
+
+// データの安全について：右上のデータのメニューから開く説明
+function safetyInfo() {
+  openPop(document.getElementById('btn-data'), `
+    <div class="pop-title">データの安全について</div>
+    <ul class="safe-list">
+      <li>データはこの端末の中だけに保存されます。運営者にも見えません</li>
+      <li>会員登録はありません。メールアドレスなどをお預かりしません</li>
+      <li>アプリが自分から通信する相手は、フォントの配信元だけです</li>
+      <li>パスワードは保存しません（保存できるのはログインIDまで）</li>
+    </ul>
+    <div class="pop-sep"></div>
+    <div class="pop-title">気をつけてほしいこと</div>
+    <ul class="safe-list caution">
+      <li>この端末をほかの人と共用している場合は、その人にも見えます</li>
+      <li>バックアップのファイルには、登録した内容がそのまま入ります。人に渡さないでください</li>
+    </ul>`, { width: 300 });
 }
 
 function exportData() {
