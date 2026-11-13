@@ -2,6 +2,18 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<!-- 安全のための決まり：このページが通信・読み込みできる相手を、自分自身と Google のフォント配信だけに限る。
+     万一ページの中に悪意のあるプログラムが入りこんでも、データを外へ送り出しにくくする -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<!-- マイページなど外のサイトを開くとき、どこから来たかを相手に伝えない -->
+<meta name="referrer" content="no-referrer">
+<script>
+// ほかのサイトの中に埋め込まれて表示されたら、何も出さない（偽サイトが操作をだます手口を防ぐ）。公開サイト（https）でだけ働く
+if (location.protocol === 'https:' && window.top !== window.self) {
+  document.documentElement.style.display = 'none';
+  try { window.top.location = window.self.location.href; } catch (_) {}
+}
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#F4F5F7">
 <title>シュウカン｜就活管理</title>
@@ -1429,7 +1441,7 @@ function undo() {
 }
 
 let _toastTimer;
-function showToast(msg, withUndo, raw) {
+function showToast(msg, withUndo, raw, ms) {
   document.getElementById('toast-msg').toggleAttribute('data-raw', !!raw);
   const t = document.getElementById('toast');
   document.getElementById('toast-msg').textContent = msg;
@@ -1437,7 +1449,7 @@ function showToast(msg, withUndo, raw) {
   t.classList.toggle('no-undo', !withUndo);
   t.classList.add('show');
   clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(hideToast, withUndo ? 5000 : 2200);
+  _toastTimer = setTimeout(hideToast, ms || (withUndo ? 5000 : 2200));
 }
 function hideToast() { document.getElementById('toast').classList.remove('show'); }
 
@@ -2167,7 +2179,7 @@ function deleteCompany(id) {
 // だめなときだけ新しい方法（clipboard API）を試す
 function copyLoginId(loginid) {
   if (!loginid) return;
-  const ok = () => showToast(`ログインID「${loginid}」をコピーしました`, false, true);
+  const ok = () => showToast('ログインIDをコピーしました');   // 盗み見されないよう、ID そのものは画面に出さない
   const ta = document.createElement('textarea');
   ta.value = loginid;
   ta.setAttribute('readonly', '');
@@ -2364,7 +2376,8 @@ function exportData() {
   URL.revokeObjectURL(url);
   lsSet(LS_BACKUP_KEY, new Date().toISOString());
   updateBackupNudge();
-  showToast('バックアップを保存しました');
+  if (companies.some(c => c.loginid)) showToast('バックアップを保存しました。このファイルにはログインIDが含まれます。人に渡さないでください', false, false, 6000);
+  else showToast('バックアップを保存しました');
 }
 
 function pickImportFile() {
